@@ -22,6 +22,8 @@ interface ApiTee {
   tee_name: string;
   number_of_holes: number;
   par_total: number;
+  courseRating?: number;
+  slope?: number;
   holes: ApiHole[];
 }
 
@@ -221,6 +223,8 @@ export function StartRound() {
             tee_name: t.tee_name,
             number_of_holes: t.number_of_holes,
             par_total: t.par_total,
+            courseRating: t.courseRating,
+            slope: t.slope,
             holes: t.holes.map((h) => ({ par: h.par, yardage: h.yards, handicap: h.handicap })),
           })),
         },
@@ -272,6 +276,8 @@ export function StartRound() {
       course: courseName,
       score,
       par,
+      courseRating: selectedTee?.courseRating,
+      slope: selectedTee?.slope,
       fairwaysHit: active.filter((h) => h.fairwayHit).length,
       fairwaysTotal: numHoles,
       greensInRegulation: active.filter((h) => h.gir).length,

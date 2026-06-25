@@ -131,10 +131,14 @@ export function Dashboard() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Handicap</CardDescription>
-            <CardTitle className="text-foreground">{stats.handicap}</CardTitle>
+            <CardDescription>Handicap Index</CardDescription>
+            <CardTitle className="text-foreground">{stats.handicap || "—"}</CardTitle>
           </CardHeader>
-          <CardContent><p className="text-sm text-muted-foreground">Estimated</p></CardContent>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              {stats.handicapMethod === "WHS" ? "WHS calculation" : "Estimated (play more rated courses for WHS)"}
+            </p>
+          </CardContent>
         </Card>
 
         <Card>

@@ -11,6 +11,8 @@ export interface SgTee {
   tee_name: string;
   par_total: number;
   number_of_holes: number;
+  courseRating?: number;
+  slope?: number;
   holes: SgHole[];
 }
 
@@ -1285,6 +1287,7 @@ export const BATAM_COURSES: SgCourse[] = [
 
 export const ALL_REGIONAL_COURSES: SgCourse[] = [
   ...SINGAPORE_COURSES,
+  ...NSRCC_COURSES,
   ...JOHOR_COURSES,
   ...BINTAN_COURSES,
   ...BATAM_COURSES,
@@ -1300,3 +1303,159 @@ export function searchRegionalCourses(query: string): SgCourse[] {
       c.location.toLowerCase().includes(q)
   );
 }
+
+// ── NSRCC COURSES (added separately) ─────────────────────────────────────────
+
+export const NSRCC_COURSES: SgCourse[] = [
+  {
+    id: "sg-nsrcc-changi",
+    club_name: "NSRCC Changi Golf Course",
+    course_name: "18-Hole Championship (Max Wexler)",
+    location: "Changi Coast Walk, Singapore",
+    tees: [
+      {
+        tee_name: "Blue",
+        par_total: 72,
+        number_of_holes: 18,
+        courseRating: 73.0,
+        slope: 137,
+        holes: [
+          { par: 4, handicap: 4,  yards: 431 },
+          { par: 5, handicap: 2,  yards: 521 },
+          { par: 5, handicap: 10, yards: 515 },
+          { par: 4, handicap: 6,  yards: 387 },
+          { par: 4, handicap: 8,  yards: 393 },
+          { par: 3, handicap: 16, yards: 214 },
+          { par: 4, handicap: 12, yards: 371 },
+          { par: 4, handicap: 14, yards: 341 },
+          { par: 3, handicap: 18, yards: 185 },
+          { par: 4, handicap: 3,  yards: 418 },
+          { par: 4, handicap: 1,  yards: 448 },
+          { par: 3, handicap: 15, yards: 178 },
+          { par: 5, handicap: 5,  yards: 528 },
+          { par: 4, handicap: 9,  yards: 405 },
+          { par: 4, handicap: 11, yards: 388 },
+          { par: 5, handicap: 7,  yards: 512 },
+          { par: 3, handicap: 17, yards: 168 },
+          { par: 4, handicap: 13, yards: 382 },
+        ],
+      },
+      {
+        tee_name: "White",
+        par_total: 72,
+        number_of_holes: 18,
+        courseRating: 70.1,
+        slope: 134,
+        holes: [
+          { par: 4, handicap: 4,  yards: 398 },
+          { par: 5, handicap: 2,  yards: 488 },
+          { par: 5, handicap: 10, yards: 482 },
+          { par: 4, handicap: 6,  yards: 355 },
+          { par: 4, handicap: 8,  yards: 362 },
+          { par: 3, handicap: 16, yards: 185 },
+          { par: 4, handicap: 12, yards: 342 },
+          { par: 4, handicap: 14, yards: 312 },
+          { par: 3, handicap: 18, yards: 158 },
+          { par: 4, handicap: 3,  yards: 385 },
+          { par: 4, handicap: 1,  yards: 415 },
+          { par: 3, handicap: 15, yards: 152 },
+          { par: 5, handicap: 5,  yards: 495 },
+          { par: 4, handicap: 9,  yards: 372 },
+          { par: 4, handicap: 11, yards: 355 },
+          { par: 5, handicap: 7,  yards: 478 },
+          { par: 3, handicap: 17, yards: 142 },
+          { par: 4, handicap: 13, yards: 350 },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sg-nsrcc-kranji",
+    club_name: "NSRCC Kranji Sanctuary Golf Course",
+    course_name: "Sanctuary Course (Gary Player)",
+    location: "Neo Tiew Lane 3, Singapore",
+    tees: [
+      {
+        tee_name: "Black",
+        par_total: 72,
+        number_of_holes: 18,
+        courseRating: 79.0,
+        slope: 136,
+        holes: [
+          { par: 4, handicap: 9,  yards: 360 },
+          { par: 3, handicap: 17, yards: 181 },
+          { par: 4, handicap: 1,  yards: 504 },
+          { par: 4, handicap: 15, yards: 305 },
+          { par: 3, handicap: 7,  yards: 136 },
+          { par: 5, handicap: 13, yards: 550 },
+          { par: 4, handicap: 11, yards: 395 },
+          { par: 4, handicap: 3,  yards: 475 },
+          { par: 5, handicap: 5,  yards: 569 },
+          { par: 5, handicap: 4,  yards: 660 },
+          { par: 4, handicap: 6,  yards: 457 },
+          { par: 4, handicap: 10, yards: 342 },
+          { par: 4, handicap: 16, yards: 391 },
+          { par: 3, handicap: 18, yards: 173 },
+          { par: 4, handicap: 8,  yards: 498 },
+          { par: 4, handicap: 2,  yards: 552 },
+          { par: 3, handicap: 12, yards: 232 },
+          { par: 5, handicap: 14, yards: 598 },
+        ],
+      },
+      {
+        tee_name: "Blue",
+        par_total: 72,
+        number_of_holes: 18,
+        courseRating: 76.8,
+        slope: 132,
+        holes: [
+          { par: 4, handicap: 9,  yards: 335 },
+          { par: 3, handicap: 17, yards: 162 },
+          { par: 4, handicap: 1,  yards: 472 },
+          { par: 4, handicap: 15, yards: 282 },
+          { par: 3, handicap: 7,  yards: 118 },
+          { par: 5, handicap: 13, yards: 520 },
+          { par: 4, handicap: 11, yards: 368 },
+          { par: 4, handicap: 3,  yards: 445 },
+          { par: 5, handicap: 5,  yards: 540 },
+          { par: 5, handicap: 4,  yards: 622 },
+          { par: 4, handicap: 6,  yards: 428 },
+          { par: 4, handicap: 10, yards: 318 },
+          { par: 4, handicap: 16, yards: 365 },
+          { par: 3, handicap: 18, yards: 152 },
+          { par: 4, handicap: 8,  yards: 468 },
+          { par: 4, handicap: 2,  yards: 522 },
+          { par: 3, handicap: 12, yards: 208 },
+          { par: 5, handicap: 14, yards: 568 },
+        ],
+      },
+      {
+        tee_name: "White",
+        par_total: 72,
+        number_of_holes: 18,
+        courseRating: 74.2,
+        slope: 128,
+        holes: [
+          { par: 4, handicap: 9,  yards: 312 },
+          { par: 3, handicap: 17, yards: 148 },
+          { par: 4, handicap: 1,  yards: 442 },
+          { par: 4, handicap: 15, yards: 262 },
+          { par: 3, handicap: 7,  yards: 105 },
+          { par: 5, handicap: 13, yards: 492 },
+          { par: 4, handicap: 11, yards: 342 },
+          { par: 4, handicap: 3,  yards: 415 },
+          { par: 5, handicap: 5,  yards: 512 },
+          { par: 5, handicap: 4,  yards: 585 },
+          { par: 4, handicap: 6,  yards: 398 },
+          { par: 4, handicap: 10, yards: 295 },
+          { par: 4, handicap: 16, yards: 340 },
+          { par: 3, handicap: 18, yards: 138 },
+          { par: 4, handicap: 8,  yards: 438 },
+          { par: 4, handicap: 2,  yards: 492 },
+          { par: 3, handicap: 12, yards: 185 },
+          { par: 5, handicap: 14, yards: 538 },
+        ],
+      },
+    ],
+  },
+];

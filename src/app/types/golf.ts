@@ -16,6 +16,8 @@ export interface GolfRound {
   course: string;
   score: number;
   par: number;
+  courseRating?: number;
+  slope?: number;
   fairwaysHit: number;
   fairwaysTotal: number;
   greensInRegulation: number;
@@ -42,6 +44,7 @@ export interface GolfStats {
   averagePutts: number;
   totalRounds: number;
   handicap: number;
+  handicapMethod?: string;
   averageEagles: number;
   averagePars: number;
   averageBirdies: number;
