@@ -7,6 +7,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { saveRound } from "../lib/storage";
 import { GolfRound, HoleData } from "../types/golf";
+import { searchRegionalCourses, SgCourse } from "../lib/singaporeCourses";
 
 const API_KEY = "RBKARIPPWIP33TZWX2EGM52VLM";
 const API_BASE = "https://api.golfcourseapi.com/v1";
@@ -85,16 +86,26 @@ function YesNoToggle({ value, onChange }: { value: boolean; onChange: (v: boolea
 
 // ── Course search ────────────────────────────────────────────────────────────
 
-function CourseSearch({ onSelect }: { onSelect: (course: ApiCourse) => void }) {
+type SearchResult =
+  | { source: "sg"; course: SgCourse }
+  | { source: "api"; course: ApiCourse };
+
+function CourseSearch({ onSelect }: { onSelect: (course: ApiCourse | SgCourse, source: "sg" | "api") => void }) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<ApiCourse[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selected, setSelected] = useState<ApiCourse | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (query.length < 2) { setResults([]); return; }
     if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    // Show regional courses immediately
+    const sgMatches = searchRegionalCourses(query).map((c): SearchResult => ({ source: "sg", course: c }));
+    setResults(sgMatches);
+
+    // Then fetch API results
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       try {
@@ -102,20 +113,22 @@ function CourseSearch({ onSelect }: { onSelect: (course: ApiCourse) => void }) {
           headers: { Authorization: `Key ${API_KEY}` },
         });
         const data = await res.json();
-        setResults(data.courses?.slice(0, 8) ?? []);
+        const apiResults: SearchResult[] = (data.courses?.slice(0, 6) ?? []).map((c: ApiCourse): SearchResult => ({ source: "api", course: c }));
+        setResults([...sgMatches, ...apiResults]);
       } catch {
-        setResults([]);
+        // Keep SG results even if API fails
       } finally {
         setLoading(false);
       }
     }, 350);
   }, [query]);
 
-  const handleSelect = (course: ApiCourse) => {
-    setSelected(course);
+  const handleSelect = (result: SearchResult) => {
+    const name = result.source === "sg" ? result.course.club_name : result.course.club_name;
+    setSelected(name);
     setResults([]);
-    setQuery(course.club_name);
-    onSelect(course);
+    setQuery(name);
+    onSelect(result.course, result.source);
   };
 
   return (
@@ -134,17 +147,26 @@ function CourseSearch({ onSelect }: { onSelect: (course: ApiCourse) => void }) {
       </div>
 
       {results.length > 0 && (
-        <div className="absolute z-10 mt-1 w-full bg-white border border-border rounded-lg shadow-lg overflow-hidden">
-          {results.map((c) => (
+        <div className="absolute z-10 mt-1 w-full bg-white border border-border rounded-lg shadow-lg overflow-hidden max-h-72 overflow-y-auto">
+          {results.map((r, i) => (
             <button
-              key={c.id}
+              key={i}
               type="button"
-              onClick={() => handleSelect(c)}
+              onClick={() => handleSelect(r)}
               className="w-full text-left px-4 py-3 hover:bg-muted/60 transition-colors border-b border-border last:border-0"
             >
-              <div className="text-sm font-medium text-foreground">{c.club_name}</div>
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-medium text-foreground">{r.course.club_name}</div>
+                {r.source === "sg" && (() => {
+                  const id = (r.course as SgCourse).id;
+                  const flag = id.startsWith("my-") ? "🇲🇾 MY" : id.startsWith("id-") ? "🇮🇩 ID" : "🇸🇬 SG";
+                  return <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">{flag}</span>;
+                })()}
+              </div>
               <div className="text-xs text-muted-foreground mt-0.5">
-                {[c.location.city, c.location.state, c.location.country].filter(Boolean).join(", ")}
+                {r.source === "sg"
+                  ? r.course.location
+                  : [r.course.location.city, r.course.location.state, r.course.location.country].filter(Boolean).join(", ")}
               </div>
             </button>
           ))}
@@ -153,7 +175,7 @@ function CourseSearch({ onSelect }: { onSelect: (course: ApiCourse) => void }) {
 
       {selected && (
         <p className="mt-1.5 text-xs text-green-600 font-medium">
-          ✓ {selected.club_name} selected
+          ✓ {selected} selected
         </p>
       )}
     </div>
@@ -182,13 +204,35 @@ export function StartRound() {
 
   const availableTees = selectedCourse?.tees[gender] ?? [];
 
-  const handleCourseSelect = (course: ApiCourse) => {
-    setSelectedCourse(course);
+  const handleCourseSelect = (course: ApiCourse | SgCourse, source: "sg" | "api") => {
     setCourseName(course.club_name);
     setSelectedTee(null);
-    // default gender to male if available
-    const g = course.tees.male?.length ? "male" : "female";
-    setGender(g);
+
+    if (source === "sg") {
+      const sgCourse = course as SgCourse;
+      // Convert SG course to ApiCourse-compatible format
+      const converted: ApiCourse = {
+        id: 0,
+        club_name: sgCourse.club_name,
+        course_name: sgCourse.course_name,
+        location: { city: sgCourse.location, state: "Singapore", country: "Singapore" },
+        tees: {
+          male: sgCourse.tees.map((t) => ({
+            tee_name: t.tee_name,
+            number_of_holes: t.number_of_holes,
+            par_total: t.par_total,
+            holes: t.holes.map((h) => ({ par: h.par, yardage: h.yards, handicap: h.handicap })),
+          })),
+        },
+      };
+      setSelectedCourse(converted);
+      setGender("male");
+    } else {
+      const apiCourse = course as ApiCourse;
+      setSelectedCourse(apiCourse);
+      const g = apiCourse.tees.male?.length ? "male" : "female";
+      setGender(g);
+    }
   };
 
   const handleTeeSelect = (tee: ApiTee) => {
@@ -271,7 +315,7 @@ export function StartRound() {
 
               <div className="space-y-2">
                 <Label>Course</Label>
-                <CourseSearch onSelect={handleCourseSelect} />
+                <CourseSearch onSelect={(course, source) => handleCourseSelect(course, source)} />
               </div>
 
               {/* Tee selection — shown after course is picked */}
