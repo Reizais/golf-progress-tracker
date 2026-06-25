@@ -1283,27 +1283,6 @@ export const BATAM_COURSES: SgCourse[] = [
   },
 ];
 
-// ── COMBINED EXPORT ───────────────────────────────────────────────────────────
-
-export const ALL_REGIONAL_COURSES: SgCourse[] = [
-  ...SINGAPORE_COURSES,
-  ...NSRCC_COURSES,
-  ...JOHOR_COURSES,
-  ...BINTAN_COURSES,
-  ...BATAM_COURSES,
-];
-
-export function searchRegionalCourses(query: string): SgCourse[] {
-  if (!query || query.length < 2) return [];
-  const q = query.toLowerCase();
-  return ALL_REGIONAL_COURSES.filter(
-    (c) =>
-      c.club_name.toLowerCase().includes(q) ||
-      c.course_name.toLowerCase().includes(q) ||
-      c.location.toLowerCase().includes(q)
-  );
-}
-
 // ── NSRCC COURSES (added separately) ─────────────────────────────────────────
 
 export const NSRCC_COURSES: SgCourse[] = [
@@ -1459,3 +1438,25 @@ export const NSRCC_COURSES: SgCourse[] = [
     ],
   },
 ];
+
+// ── COMBINED EXPORT ───────────────────────────────────────────────────────────
+
+export const ALL_REGIONAL_COURSES: SgCourse[] = [
+  ...SINGAPORE_COURSES,
+  ...NSRCC_COURSES,
+  ...JOHOR_COURSES,
+  ...BINTAN_COURSES,
+  ...BATAM_COURSES,
+];
+
+export function searchRegionalCourses(query: string): SgCourse[] {
+  if (!query || query.length < 2) return [];
+  const q = query.toLowerCase();
+  return ALL_REGIONAL_COURSES.filter(
+    (c) =>
+      c.club_name.toLowerCase().includes(q) ||
+      c.course_name.toLowerCase().includes(q) ||
+      c.location.toLowerCase().includes(q)
+  );
+}
+
