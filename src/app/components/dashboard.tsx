@@ -23,9 +23,13 @@ function Trend({ current, previous, lowerIsBetter = false }: {
 
 export function Dashboard() {
   const [rounds, setRounds] = useState<GolfRound[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setRounds(getRounds());
+    getRounds().then((data) => {
+      setRounds(data);
+      setLoading(false);
+    });
   }, []);
 
   const stats = calculateStats(rounds);
@@ -52,10 +56,8 @@ export function Dashboard() {
 
   const lastPutts = last?.putts ?? null;
   const prevPutts = prev?.putts;
-
   const lastChips = last?.totalChips ?? null;
   const prevChips = prev?.totalChips;
-
   const lastPenalties = last?.totalPenalties ?? null;
   const prevPenalties = prev?.totalPenalties;
 
@@ -68,26 +70,34 @@ export function Dashboard() {
   }));
 
   const summaryCards = [
-    { label: "Eagles",        value: stats.totalEagles,       color: "text-yellow-400" },
-    { label: "Birdies",       value: stats.totalBirdies,      color: "text-yellow-500" },
-    { label: "Pars",          value: stats.totalPars,         color: "text-green-600"  },
-    { label: "Bogeys",        value: stats.totalBogeys,       color: "text-blue-600"   },
-    { label: "Doubles",       value: stats.totalDoubleBogeys, color: "text-orange-500" },
-    { label: "Triple+",       value: stats.totalTripleBogeys, color: "text-red-600"    },
+    { label: "Eagles",  value: stats.totalEagles,       color: "text-yellow-400" },
+    { label: "Birdies", value: stats.totalBirdies,      color: "text-yellow-500" },
+    { label: "Pars",    value: stats.totalPars,         color: "text-green-600"  },
+    { label: "Bogeys",  value: stats.totalBogeys,       color: "text-blue-600"   },
+    { label: "Doubles", value: stats.totalDoubleBogeys, color: "text-orange-500" },
+    { label: "Triple+", value: stats.totalTripleBogeys, color: "text-red-600"    },
   ];
 
   const breakdownCards = [
-    { label: "Avg Eagles",   value: stats.averageEagles,      color: "text-yellow-400" },
-    { label: "Avg Birdies",  value: stats.averageBirdies,     color: "text-yellow-500" },
-    { label: "Avg Pars",     value: stats.averagePars,        color: "text-green-600"  },
-    { label: "Avg Bogeys",   value: stats.averageBogeys,      color: "text-blue-600"   },
+    { label: "Avg Eagles",   value: stats.averageEagles,       color: "text-yellow-400" },
+    { label: "Avg Birdies",  value: stats.averageBirdies,      color: "text-yellow-500" },
+    { label: "Avg Pars",     value: stats.averagePars,         color: "text-green-600"  },
+    { label: "Avg Bogeys",   value: stats.averageBogeys,       color: "text-blue-600"   },
     { label: "Avg Doubles",  value: stats.averageDoubleBogeys, color: "text-orange-500" },
-    { label: "Avg Triples+", value: stats.averageTripleBogeys, color: "text-red-600"   },
+    { label: "Avg Triples+", value: stats.averageTripleBogeys, color: "text-red-600"    },
   ];
 
   const tooltipStyle = {
     contentStyle: { backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: "6px" },
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
+        Loading your rounds...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -101,15 +111,9 @@ export function Dashboard() {
           <CardContent>
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               {scoreTrend > 0 ? (
-                <>
-                  <TrendingDown className="size-4 text-green-600" />
-                  <span className="text-green-600">-{scoreTrend}</span>
-                </>
+                <><TrendingDown className="size-4 text-green-600" /><span className="text-green-600">-{scoreTrend}</span></>
               ) : scoreTrend < 0 ? (
-                <>
-                  <TrendingUp className="size-4 text-red-600" />
-                  <span className="text-red-600">+{Math.abs(scoreTrend)}</span>
-                </>
+                <><TrendingUp className="size-4 text-red-600" /><span className="text-red-600">+{Math.abs(scoreTrend)}</span></>
               ) : (
                 <span>No change</span>
               )}
@@ -122,9 +126,7 @@ export function Dashboard() {
             <CardDescription>Best Score</CardDescription>
             <CardTitle className="text-foreground">{stats.bestScore || "—"}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Personal best</p>
-          </CardContent>
+          <CardContent><p className="text-sm text-muted-foreground">Personal best</p></CardContent>
         </Card>
 
         <Card>
@@ -132,9 +134,7 @@ export function Dashboard() {
             <CardDescription>Handicap</CardDescription>
             <CardTitle className="text-foreground">{stats.handicap}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Estimated</p>
-          </CardContent>
+          <CardContent><p className="text-sm text-muted-foreground">Estimated</p></CardContent>
         </Card>
 
         <Card>
@@ -142,9 +142,7 @@ export function Dashboard() {
             <CardDescription>Total Rounds</CardDescription>
             <CardTitle className="text-foreground">{stats.totalRounds}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">All time</p>
-          </CardContent>
+          <CardContent><p className="text-sm text-muted-foreground">All time</p></CardContent>
         </Card>
       </div>
 
@@ -169,9 +167,7 @@ export function Dashboard() {
             <CardTitle>Last Round Score Breakdown</CardTitle>
             <CardDescription>
               {last.course} &mdash;{" "}
-              {new Date(last.date).toLocaleDateString("en-US", {
-                month: "short", day: "numeric", year: "numeric",
-              })}
+              {new Date(last.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </CardDescription>
           </CardHeader>
           <CardContent className="px-3">
@@ -179,12 +175,12 @@ export function Dashboard() {
               <div className="grid grid-cols-7 divide-x divide-border min-w-[380px]">
                 {[
                   { label: "Total Score", value: `${last.score} (${last.score > last.par ? "+" : last.score === last.par ? "E" : ""}${last.score !== last.par ? last.score - last.par : ""})`, color: "text-foreground" },
-                  { label: "Eagles",     value: last.eagles,       color: "text-yellow-500" },
-                  { label: "Birdies",    value: last.birdies,      color: "text-yellow-600" },
-                  { label: "Pars",       value: last.pars,         color: "text-green-700"  },
-                  { label: "Bogeys",     value: last.bogeys,       color: "text-blue-600"   },
-                  { label: "Doubles",    value: last.doubleBogeys, color: "text-orange-500" },
-                  { label: "Triples+",   value: last.tripleBogeys, color: "text-red-600"    },
+                  { label: "Eagles",    value: last.eagles,       color: "text-yellow-500" },
+                  { label: "Birdies",   value: last.birdies,      color: "text-yellow-600" },
+                  { label: "Pars",      value: last.pars,         color: "text-green-700"  },
+                  { label: "Bogeys",    value: last.bogeys,       color: "text-blue-600"   },
+                  { label: "Doubles",   value: last.doubleBogeys, color: "text-orange-500" },
+                  { label: "Triples+",  value: last.tripleBogeys, color: "text-red-600"    },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="flex flex-col items-center py-3 px-1 gap-0.5">
                     <span className={`text-lg font-semibold ${color}`}>{value}</span>
@@ -197,15 +193,10 @@ export function Dashboard() {
         </Card>
       )}
 
-      {/* Quick Stats with last round + trend */}
+      {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Target className="size-5 text-blue-600" />
-              <CardTitle>Fairway Accuracy</CardTitle>
-            </div>
-          </CardHeader>
+          <CardHeader><div className="flex items-center gap-2"><Target className="size-5 text-blue-600" /><CardTitle>Fairway Accuracy</CardTitle></div></CardHeader>
           <CardContent className="space-y-2">
             <div className="text-foreground">{stats.averageFairwayAccuracy}%</div>
             <p className="text-sm text-muted-foreground">Average hit rate</p>
@@ -220,12 +211,7 @@ export function Dashboard() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Activity className="size-5 text-green-600" />
-              <CardTitle>Greens in Regulation</CardTitle>
-            </div>
-          </CardHeader>
+          <CardHeader><div className="flex items-center gap-2"><Activity className="size-5 text-green-600" /><CardTitle>Greens in Regulation</CardTitle></div></CardHeader>
           <CardContent className="space-y-2">
             <div className="text-foreground">{stats.averageGIR}%</div>
             <p className="text-sm text-muted-foreground">Average GIR</p>
@@ -240,12 +226,7 @@ export function Dashboard() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Target className="size-5 text-purple-600" />
-              <CardTitle>Average Putts</CardTitle>
-            </div>
-          </CardHeader>
+          <CardHeader><div className="flex items-center gap-2"><Target className="size-5 text-purple-600" /><CardTitle>Average Putts</CardTitle></div></CardHeader>
           <CardContent className="space-y-2">
             <div className="text-foreground">{stats.averagePutts}</div>
             <p className="text-sm text-muted-foreground">Per round</p>
@@ -260,12 +241,7 @@ export function Dashboard() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Activity className="size-5 text-amber-600" />
-              <CardTitle>Avg Chip Shots</CardTitle>
-            </div>
-          </CardHeader>
+          <CardHeader><div className="flex items-center gap-2"><Activity className="size-5 text-amber-600" /><CardTitle>Avg Chip Shots</CardTitle></div></CardHeader>
           <CardContent className="space-y-2">
             <div className="text-foreground">{stats.averageChips}</div>
             <p className="text-sm text-muted-foreground">Per round</p>
@@ -280,12 +256,7 @@ export function Dashboard() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Target className="size-5 text-red-500" />
-              <CardTitle>Avg Penalties</CardTitle>
-            </div>
-          </CardHeader>
+          <CardHeader><div className="flex items-center gap-2"><Target className="size-5 text-red-500" /><CardTitle>Avg Penalties</CardTitle></div></CardHeader>
           <CardContent className="space-y-2">
             <div className="text-foreground">{stats.averagePenalties}</div>
             <p className="text-sm text-muted-foreground">Per round</p>
@@ -332,45 +303,22 @@ export function Dashboard() {
               <LineChart data={trendData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="date" stroke="#64748b" tick={{ fontSize: 11 }} />
-                <YAxis
-                  yAxisId="pct"
-                  domain={[0, 100]}
-                  stroke="#64748b"
-                  tickFormatter={(v) => `${v}%`}
-                  width={40}
-                  tick={{ fontSize: 11 }}
-                />
-                <YAxis
-                  yAxisId="putts"
-                  orientation="right"
-                  stroke="#a855f7"
-                  width={36}
-                  tick={{ fontSize: 11 }}
-                />
-                <Tooltip
-                  {...tooltipStyle}
-                  formatter={(value: number, name: string) =>
-                    name === "Putts" ? [value, name] : [`${value}%`, name]
-                  }
-                />
+                <YAxis yAxisId="pct" domain={[0, 100]} stroke="#64748b" tickFormatter={(v) => `${v}%`} width={40} tick={{ fontSize: 11 }} />
+                <YAxis yAxisId="putts" orientation="right" stroke="#a855f7" width={36} tick={{ fontSize: 11 }} />
+                <Tooltip {...tooltipStyle} formatter={(value: number, name: string) => name === "Putts" ? [value, name] : [`${value}%`, name]} />
                 <Legend />
-                <Line yAxisId="pct" type="monotone" dataKey="fairways" name="Fairway Hit"
-                  stroke="#3b82f6" strokeWidth={2} dot={{ r: 3, fill: "#3b82f6" }} activeDot={{ r: 5 }} />
-                <Line yAxisId="pct" type="monotone" dataKey="gir" name="GIR"
-                  stroke="#10b981" strokeWidth={2} dot={{ r: 3, fill: "#10b981" }} activeDot={{ r: 5 }} />
-                <Line yAxisId="putts" type="monotone" dataKey="putts" name="Putts"
-                  stroke="#a855f7" strokeWidth={2} strokeDasharray="5 4"
-                  dot={{ r: 3, fill: "#a855f7" }} activeDot={{ r: 5 }} />
+                <Line yAxisId="pct" type="monotone" dataKey="fairways" name="Fairway Hit" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3, fill: "#3b82f6" }} activeDot={{ r: 5 }} />
+                <Line yAxisId="pct" type="monotone" dataKey="gir" name="GIR" stroke="#10b981" strokeWidth={2} dot={{ r: 3, fill: "#10b981" }} activeDot={{ r: 5 }} />
+                <Line yAxisId="putts" type="monotone" dataKey="putts" name="Putts" stroke="#a855f7" strokeWidth={2} strokeDasharray="5 4" dot={{ r: 3, fill: "#a855f7" }} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-              No data available
+              No rounds recorded yet — start your first round!
             </div>
           )}
         </CardContent>
       </Card>
-
     </div>
   );
 }

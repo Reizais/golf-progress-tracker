@@ -217,7 +217,7 @@ export function StartRound() {
     });
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     const active = holes.slice(0, numHoles);
     const score = active.reduce((s, h) => s + h.score, 0);
     const par = active.reduce((s, h) => s + h.par, 0);
@@ -245,7 +245,7 @@ export function StartRound() {
       holes: active.map((h, i) => ({ ...h, hole: i + 1 })),
     };
 
-    saveRound(round);
+    await saveRound(round);
     navigate("/");
   };
 

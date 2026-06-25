@@ -3,30 +3,36 @@ import { Trash2, MapPin, Calendar } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { getRounds, deleteRound } from "../lib/storage";
 import { GolfRound } from "../types/golf";
 
 export function History() {
   const [rounds, setRounds] = useState<GolfRound[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setRounds(getRounds());
+    getRounds().then((data) => {
+      setRounds(data);
+      setLoading(false);
+    });
   }, []);
 
-  const handleDelete = (id: string) => {
-    deleteRound(id);
-    setRounds(getRounds());
+  const handleDelete = async (id: string) => {
+    await deleteRound(id);
+    setRounds((prev) => prev.filter((r) => r.id !== id));
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
+        Loading history...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -41,10 +47,7 @@ export function History() {
           {rounds.length > 0 ? (
             <div className="space-y-3">
               {rounds.map(round => (
-                <div
-                  key={round.id}
-                  className="border border-border rounded-lg p-4 hover:border-slate-300 transition-colors"
-                >
+                <div key={round.id} className="border border-border rounded-lg p-4 hover:border-slate-300 transition-colors">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -54,10 +57,7 @@ export function History() {
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="size-3" />
                         {new Date(round.date).toLocaleDateString('en-US', {
-                          weekday: 'long',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
+                          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
                         })}
                       </div>
                     </div>
@@ -93,22 +93,17 @@ export function History() {
                     </div>
                   </div>
 
-                  {/* Round Stats */}
                   <div className="grid grid-cols-3 gap-4 p-3 bg-muted rounded-md">
                     <div className="text-center">
                       <div className="text-sm text-muted-foreground">Fairways</div>
-                      <div className="text-foreground">
-                        {round.fairwaysHit}/{round.fairwaysTotal}
-                      </div>
+                      <div className="text-foreground">{round.fairwaysHit}/{round.fairwaysTotal}</div>
                       <div className="text-xs text-muted-foreground">
                         {Math.round((round.fairwaysHit / round.fairwaysTotal) * 100)}%
                       </div>
                     </div>
                     <div className="text-center">
                       <div className="text-sm text-muted-foreground">GIR</div>
-                      <div className="text-foreground">
-                        {round.greensInRegulation}/{round.greensTotal}
-                      </div>
+                      <div className="text-foreground">{round.greensInRegulation}/{round.greensTotal}</div>
                       <div className="text-xs text-muted-foreground">
                         {Math.round((round.greensInRegulation / round.greensTotal) * 100)}%
                       </div>
@@ -116,17 +111,12 @@ export function History() {
                     <div className="text-center">
                       <div className="text-sm text-muted-foreground">Putts</div>
                       <div className="text-foreground">{round.putts}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {(round.putts / 18).toFixed(1)} avg
-                      </div>
+                      <div className="text-xs text-muted-foreground">{(round.putts / 18).toFixed(1)} avg</div>
                     </div>
                   </div>
 
-                  {/* Notes */}
                   {round.notes && (
-                    <div className="mt-3 text-sm text-muted-foreground italic">
-                      "{round.notes}"
-                    </div>
+                    <div className="mt-3 text-sm text-muted-foreground italic">"{round.notes}"</div>
                   )}
                 </div>
               ))}

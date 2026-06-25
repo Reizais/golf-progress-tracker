@@ -1,27 +1,51 @@
+import { supabase } from "./supabase";
 import { GolfRound } from "../types/golf";
 
-const STORAGE_KEY = "golf_rounds";
+export async function getRounds(): Promise<GolfRound[]> {
+  const { data, error } = await supabase
+    .from("rounds")
+    .select("*")
+    .order("date", { ascending: false });
 
-export function getRounds(): GolfRound[] {
-  if (typeof window === "undefined") return [];
-  const data = localStorage.getItem(STORAGE_KEY);
-  if (!data) return [];
-  return JSON.parse(data);
+  if (error) {
+    console.error("Error fetching rounds:", error);
+    return [];
+  }
+
+  return data.map((row) => ({ ...row.data, id: row.id }));
 }
 
-export function saveRound(round: GolfRound): void {
-  const rounds = getRounds();
-  rounds.unshift(round);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(rounds));
+export async function saveRound(round: GolfRound): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const { error } = await supabase.from("rounds").insert({
+    id: round.id,
+    user_id: user.id,
+    date: round.date,
+    course: round.course,
+    score: round.score,
+    data: round,
+  });
+
+  if (error) throw error;
 }
 
-export function deleteRound(id: string): void {
-  const rounds = getRounds().filter(r => r.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(rounds));
+export async function deleteRound(id: string): Promise<void> {
+  const { error } = await supabase.from("rounds").delete().eq("id", id);
+  if (error) throw error;
 }
 
-export function updateRound(updatedRound: GolfRound): void {
-  const rounds = getRounds().map(r => r.id === updatedRound.id ? updatedRound : r);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(rounds));
-}
+export async function updateRound(updatedRound: GolfRound): Promise<void> {
+  const { error } = await supabase
+    .from("rounds")
+    .update({
+      date: updatedRound.date,
+      course: updatedRound.course,
+      score: updatedRound.score,
+      data: updatedRound,
+    })
+    .eq("id", updatedRound.id);
 
+  if (error) throw error;
+}

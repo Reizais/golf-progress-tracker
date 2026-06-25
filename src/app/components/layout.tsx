@@ -1,9 +1,11 @@
 import { Outlet, Link, useLocation } from "react-router";
-import { Home, Plus, History } from "lucide-react";
+import { Home, Plus, History, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
+import { useAuth } from "../context/AuthContext";
 
 export function Layout() {
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const isActive = (path: string) => {
     if (path === "/" && location.pathname === "/") return true;
@@ -18,12 +20,22 @@ export function Layout() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-foreground tracking-wide">Golf Progress Tracker</h1>
-            <Link to="/start-round">
-              <Button size="sm">
-                <Plus className="size-4 mr-2" />
-                Start Round
+            <div className="flex items-center gap-2">
+              <Link to="/start-round">
+                <Button size="sm">
+                  <Plus className="size-4 mr-2" />
+                  Start Round
+                </Button>
+              </Link>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={signOut}
+                title={`Sign out (${user?.email})`}
+              >
+                <LogOut className="size-4" />
               </Button>
-            </Link>
+            </div>
           </div>
         </div>
       </header>
