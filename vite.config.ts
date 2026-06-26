@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-
+import fs from 'fs'
 
 function figmaAssetResolver() {
   return {
@@ -16,21 +16,30 @@ function figmaAssetResolver() {
   }
 }
 
+// Removes _redirects and .assetsignore that Wrangler injects into dist,
+// which cause "Infinite loop" errors on Cloudflare Workers deploys.
+function removeWranglerFiles() {
+  return {
+    name: 'remove-wrangler-files',
+    closeBundle() {
+      ['dist/_redirects', 'dist/.assetsignore'].forEach(f => {
+        try { fs.unlinkSync(f); console.log(`Removed: ${f}`) } catch {}
+      })
+    }
+  }
+}
+
 export default defineConfig({
   plugins: [
     figmaAssetResolver(),
-    // The React and Tailwind plugins are both required for Make, even if
-    // Tailwind is not being actively used – do not remove them
     react(),
     tailwindcss(),
+    removeWranglerFiles(),
   ],
   resolve: {
     alias: {
-      // Alias @ to the src directory
       '@': path.resolve(__dirname, './src'),
     },
   },
-
-  // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 })
