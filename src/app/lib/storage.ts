@@ -6,7 +6,7 @@ export async function getRounds(): Promise<GolfRound[]> {
     .from("rounds")
     .select("*")
     .order("date", { ascending: false });
-
+  
   if (error) {
     console.error("Error fetching rounds:", error);
     return [];
