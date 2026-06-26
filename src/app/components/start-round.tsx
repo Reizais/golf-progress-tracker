@@ -523,11 +523,7 @@ export function StartRound() {
       </Card>
 
       {/* Navigation */}
-      {saveError && (
-        <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-md px-3 py-2 mb-2">
-          {saveError}
-        </p>
-      )}
+      
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => setCurrentHole((h) => h - 1)} disabled={currentHole === 0}
           className="flex items-center gap-1">
