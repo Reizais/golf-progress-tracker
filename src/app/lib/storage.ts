@@ -20,7 +20,6 @@ export async function saveRound(round: GolfRound): Promise<void> {
   if (!user) throw new Error("Not authenticated");
 
   const { error } = await supabase.from("rounds").insert({
-    id: round.id,
     user_id: user.id,
     date: round.date,
     course: round.course,
