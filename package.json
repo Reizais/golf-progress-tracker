@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "build": "vite build && rm -f dist/_redirects",
+    "build": "vite build",
+    "postbuild": "node -e \"const fs=require('fs');['dist/_redirects','dist/.assetsignore'].forEach(f=>{try{fs.unlinkSync(f);console.log('Removed',f)}catch(e){}})\"",
     "dev": "vite"
   },
   "dependencies": {
