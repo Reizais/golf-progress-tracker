@@ -265,7 +265,12 @@ export function StartRound() {
     });
   };
 
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   const handleFinish = async () => {
+    setSaving(true);
+    setSaveError(null);
     const active = holes.slice(0, numHoles);
     const score = active.reduce((s, h) => s + h.score, 0);
     const par = active.reduce((s, h) => s + h.par, 0);
@@ -295,8 +300,14 @@ export function StartRound() {
       holes: active.map((h, i) => ({ ...h, hole: i + 1 })),
     };
 
-    await saveRound(round);
-    navigate("/");
+    try {
+      await saveRound(round);
+      navigate("/");
+    } catch (err) {
+      console.error("Save error:", err);
+      setSaveError("Failed to save round. Please check you are logged in and try again.");
+      setSaving(false);
+    }
   };
 
   // ── Step 1: Course Details ──────────────────────────────────────────────
@@ -519,8 +530,13 @@ export function StartRound() {
         </Button>
 
         {isLast ? (
-          <Button onClick={handleFinish} className="flex-1 flex items-center gap-2">
-            <CheckCircle2 className="size-4" /> Finish Round
+          {saveError && (
+            <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+              {saveError}
+            </p>
+          )}
+          <Button onClick={handleFinish} disabled={saving} className="flex-1 flex items-center gap-2">
+            <CheckCircle2 className="size-4" /> {saving ? "Saving..." : "Finish Round"}
           </Button>
         ) : (
           <Button onClick={() => setCurrentHole((h) => h + 1)}
